@@ -1,0 +1,53 @@
+version: "3.3"
+
+services:
+
+  gateway:
+    container_name: gateway
+    build: ./gateway
+    command: nodemon app.js --legacy-watch
+    environment:
+      - RABBIT_MQ_HOST=rabbitmq
+      - RABBIT_MQ_USER=root
+      - RABBIT_MQ_PASSWORD=framework
+      - RABBIT_MQ_PATTERN=gateway.*
+      - RABBIT_MQ_QUEUE_NAME=gateway
+      - RABBIT_MQ_EXCHANGE_NAME=framework
+      - MONGODB_DBNAME=framework
+      - MONGODB_HOST=mongodb
+      - JWT_SECRET=framework
+      - PORT=80
+    #      - DEBUG=*
+    ports:
+      - "4500:80"
+    volumes:
+      - ./gateway:/var/app/
+      - ./common/utils:/var/app/modules/utils
+      - ./common/models:/var/app/modules/models
+    restart: always
+
+  user:
+    container_name: user
+    build: ./user
+    command: nodemon app.js --legacy-watch
+    environment:
+      - RABBIT_MQ_HOST=rabbitmq
+      - RABBIT_MQ_USER=root
+      - RABBIT_MQ_PASSWORD=framework
+      - RABBIT_MQ_PATTERN=user.*
+      - RABBIT_MQ_QUEUE_NAME=user
+      - RABBIT_MQ_EXCHANGE_NAME=framework
+      - MONGODB_DBNAME=framework
+      - MONGODB_HOST=mongodb
+      - PORT=80
+      - JWT_SECRET=framework
+    #      - DEBUG=*
+    volumes:
+      - ./user/:/var/app/
+      - ./common/utils:/var/app/modules/utils
+      - ./common/models:/var/app/modules/models
+    restart: always
+networks:
+  default:
+    external:
+      name: nodejs_framework
